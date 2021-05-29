@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import Particles from 'react-particles-js';
 import Navigation from './components/Navigation/Navigation';
-import Logo from './components/Logo/Logo';
+import Signin from './components/Signin/Signin';
+import Register from './components/Register/Register';
 import Rank from './components/Rank/Rank';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
@@ -38,7 +39,8 @@ class App extends Component {
     this.state = {
       input: '',
       imageUrl: 'https://www.publicbooks.org/wp-content/uploads/2019/11/joel-mott-LaK153ghdig-unsplash-scaled-e1574787737429-810x625.jpg',
-      box: {}
+      box: {},
+      route: 'signin'
     }
   }
 
@@ -77,18 +79,38 @@ class App extends Component {
       );
   }
 
+  onRouteChange = (route) => {
+    console.log(route)
+    this.setState({ route: route })
+  };
+
+  // onSignOut = (event) => {
+  //   console.log(event.target.value)
+  //   this.setState({ route: 'signin' })
+  // };
+
   render() {
     return (
       <div className="App" >
         <Particles className="particles"
           params={particleOptions}
         />
-        <Navigation className="dib" />
-        <Rank />
-        <ImageLinkForm
-          onInputChange={this.onInputChange}
-          onButtonSubmit={this.onButtonSubmit} />
-        <FaceRecognition imageUrl={this.state.imageUrl} box={this.state.box} />
+        <Navigation onSignOut={this.onRouteChange} />
+        { this.state.route === 'home'
+          ? <>
+            <Rank />
+            <ImageLinkForm
+              onInputChange={this.onInputChange}
+              onButtonSubmit={this.onButtonSubmit} />
+            <FaceRecognition imageUrl={this.state.imageUrl} box={this.state.box} />
+          </>
+          : (
+            this.state.route === 'signin'
+              ? <Signin onRouteChange={this.onRouteChange} />
+              : <Register onRouteChange={this.onRouteChange} />
+          )
+
+        }
       </div>
     );
   }
