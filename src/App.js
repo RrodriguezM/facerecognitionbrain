@@ -40,17 +40,16 @@ class App extends Component {
       input: '',
       imageUrl: 'https://www.publicbooks.org/wp-content/uploads/2019/11/joel-mott-LaK153ghdig-unsplash-scaled-e1574787737429-810x625.jpg',
       box: {},
-      route: 'signin'
+      route: 'signin',
+      isSigned: false
     }
   }
 
   calculateFaceLocation = (data) => {
     const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box
-    console.log(clarifaiFace)
     const imageFace = document.getElementById('imageFace')
     const width = imageFace.width
     const height = imageFace.height
-    console.log(width, height)
     return {
       leftCol: clarifaiFace.left_col * width,
       topRow: clarifaiFace.top_row * height,
@@ -81,28 +80,30 @@ class App extends Component {
 
   onRouteChange = (route) => {
     console.log(route)
+    if (route === 'home') {
+      this.setState({ isSigned: true })
+    } else {
+      this.setState({ isSigned: false })
+    }
     this.setState({ route: route })
   };
 
-  // onSignOut = (event) => {
-  //   console.log(event.target.value)
-  //   this.setState({ route: 'signin' })
-  // };
-
   render() {
+
+    const { isSigned, imageUrl, box } = this.state
     return (
       <div className="App" >
         <Particles className="particles"
           params={particleOptions}
         />
-        <Navigation onSignOut={this.onRouteChange} />
+        <Navigation onSignOut={this.onRouteChange} isSigned={isSigned} />
         { this.state.route === 'home'
           ? <>
             <Rank />
             <ImageLinkForm
               onInputChange={this.onInputChange}
               onButtonSubmit={this.onButtonSubmit} />
-            <FaceRecognition imageUrl={this.state.imageUrl} box={this.state.box} />
+            <FaceRecognition imageUrl={imageUrl} box={box} />
           </>
           : (
             this.state.route === 'signin'
