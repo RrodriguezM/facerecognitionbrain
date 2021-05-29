@@ -83,8 +83,7 @@ class App extends Component {
         <Particles className="particles"
           params={particleOptions}
         />
-        <Navigation />
-        <Logo />
+        <Navigation className="dib" />
         <Rank />
         <ImageLinkForm
           onInputChange={this.onInputChange}
