@@ -33,16 +33,25 @@ const particleOptions = {
   }
 }
 
+const initialState = {
+  input: '',
+  imageUrl: 'https://www.publicbooks.org/wp-content/uploads/2019/11/joel-mott-LaK153ghdig-unsplash-scaled-e1574787737429-810x625.jpg',
+  box: {},
+  route: 'signin',
+  isSigned: false,
+  user: {
+    id: "",
+    name: "",
+    email: "",
+    entries: 0,
+    joined: ""
+  }
+}
+
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      input: '',
-      imageUrl: 'https://www.publicbooks.org/wp-content/uploads/2019/11/joel-mott-LaK153ghdig-unsplash-scaled-e1574787737429-810x625.jpg',
-      box: {},
-      route: 'signin',
-      isSigned: false
-    }
+    this.state = initialState;
   }
 
   calculateFaceLocation = (data) => {
@@ -71,22 +80,51 @@ class App extends Component {
     this.setState({ imageUrl: this.state.input })
     app.models.predict("f76196b43bbd45c99b4f3cd8e8b40a8a",
       this.state.input)
-      .then(response => this.displayfaceBox(this.calculateFaceLocation(response)))
+      .then(response => {
+        this.displayfaceBox(this.calculateFaceLocation(response))
+      })
       .catch(error => {
         console.log(error)
       }
       );
+    fetch('http://localhost:3000/image', {
+      method: "put",
+      headers: { 'Content-type': 'Application/json' },
+      body: JSON.stringify({
+        id: this.state.user.id,
+      })
+    }).then(response => response.json())
+      .then(user => {
+        console.log(user)
+        if (user) {
+          this.onLoadData(user)
+          // this.props.onRouteChange('home')
+        }
+      })
+      .catch(console.log);
   }
 
   onRouteChange = (route) => {
     console.log(route)
-    if (route === 'home') {
+    if (route === 'signout') {
+      this.setState(initialState)
+    } else if (route === 'home') {
       this.setState({ isSigned: true })
-    } else {
-      this.setState({ isSigned: false })
     }
     this.setState({ route: route })
   };
+
+  onLoadData = (data) => {
+    this.setState({
+      user: {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        entries: data.entries,
+        joined: data.joined
+      }
+    })
+  }
 
   render() {
 
@@ -99,7 +137,7 @@ class App extends Component {
         <Navigation onSignOut={this.onRouteChange} isSigned={isSigned} />
         { this.state.route === 'home'
           ? <>
-            <Rank />
+            <Rank user={this.state.user} />
             <ImageLinkForm
               onInputChange={this.onInputChange}
               onButtonSubmit={this.onButtonSubmit} />
@@ -107,8 +145,8 @@ class App extends Component {
           </>
           : (
             this.state.route === 'signin'
-              ? <Signin onRouteChange={this.onRouteChange} />
-              : <Register onRouteChange={this.onRouteChange} />
+              ? <Signin onLoadData={this.onLoadData} onRouteChange={this.onRouteChange} />
+              : <Register onLoadData={this.onLoadData} onRouteChange={this.onRouteChange} />
           )
 
         }
